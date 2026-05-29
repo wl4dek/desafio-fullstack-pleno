@@ -80,16 +80,16 @@ func (r *childRepository) List(ctx context.Context, filters Filters) ([]Child, e
 	qb := NewQueryBuilder()
 
 	if filters.Name != "" {
-		qb.AddCondition("name ILIKE $1", "%"+filters.Name+"%")
+		qb.AddCondition(fmt.Sprintf("c.name ILIKE $%d", len(qb.args)+1), "%"+filters.Name+"%")
 	}
 	if filters.Neighborhood != "" {
-		qb.AddCondition("neighborhood = $1", filters.Neighborhood)
+		qb.AddCondition(fmt.Sprintf("c.neighborhood = $%d", len(qb.args)+1), filters.Neighborhood)
 	}
-	if filters.HasAlert != nil {
-		qb.AddCondition(fmt.Sprintf("has_alert = $%d", len(qb.args)+1), *filters.HasAlert)
+	if filters.Alert != "" {
+		qb.AddCondition(fmt.Sprintf("a.code = $%d", len(qb.args)+1), filters.Alert)
 	}
 	if filters.Reviewed != nil {
-		qb.AddCondition(fmt.Sprintf("reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
+		qb.AddCondition(fmt.Sprintf("c.reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
 	}
 
 	query, args := qb.BuildPaginatedList(filters.PerPage, filters.Offset())
@@ -104,7 +104,7 @@ func (r *childRepository) List(ctx context.Context, filters Filters) ([]Child, e
 		var c Child
 		err := rows.Scan(
 			&c.ID, &c.Name, &c.Age, &c.Neighborhood,
-			&c.HasAlert, &c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
+			&c.AlertCategories, &c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
 			&c.Notes, &c.CreatedAt,
 		)
 		if err != nil {
@@ -124,13 +124,13 @@ func (r *childRepository) CountFiltered(ctx context.Context, filters Filters) (i
 	qb := NewQueryBuilder()
 
 	if filters.Neighborhood != "" {
-		qb.AddCondition("neighborhood = $1", filters.Neighborhood)
+		qb.AddCondition(fmt.Sprintf("c.neighborhood = $%d", len(qb.args)+1), filters.Neighborhood)
 	}
-	if filters.HasAlert != nil {
-		qb.AddCondition(fmt.Sprintf("has_alert = $%d", len(qb.args)+1), *filters.HasAlert)
+	if filters.Alert != "" {
+		qb.AddCondition(fmt.Sprintf("a.code = $%d", len(qb.args)+1), filters.Alert)
 	}
 	if filters.Reviewed != nil {
-		qb.AddCondition(fmt.Sprintf("reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
+		qb.AddCondition(fmt.Sprintf("c.reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
 	}
 
 	query, args := qb.BuildCount()
@@ -144,14 +144,14 @@ func (r *childRepository) CountFiltered(ctx context.Context, filters Filters) (i
 
 func (r *childRepository) FindByID(ctx context.Context, id string) (*Child, error) {
 	var c Child
-	err := r.pool.QueryRow(ctx, `
-		SELECT id, name, age, neighborhood, has_alert, reviewed, reviewed_by, reviewed_at, COALESCE(notes, ''), created_at
-		FROM children WHERE id like $1`, id).
-		Scan(
-			&c.ID, &c.Name, &c.Age, &c.Neighborhood,
-			&c.HasAlert, &c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
-			&c.Notes, &c.CreatedAt,
-		)
+	qb := NewQueryBuilder()
+	qb.AddCondition("id = $1", id)
+	query, args := qb.BuildList()
+	err := r.pool.QueryRow(ctx, query, args...).Scan(
+		&c.ID, &c.Name, &c.Age, &c.Neighborhood,
+		&c.AlertCategories, &c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
+		&c.Notes, &c.CreatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil

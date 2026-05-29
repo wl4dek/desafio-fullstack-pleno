@@ -15,8 +15,8 @@ type QueryBuilder struct {
 
 func NewQueryBuilder() *QueryBuilder {
 	return &QueryBuilder{
-		baseQuery:  "SELECT id, name, age, neighborhood, has_alert, reviewed, reviewed_by, reviewed_at, COALESCE(notes, ''), created_at FROM children",
-		countQuery: "SELECT COUNT(*) FROM children",
+		baseQuery:  "SELECT c.id, c.name, c.age, c.neighborhood, STRING_AGG(distinct a.category, ', ') AS alert_categories, c.reviewed, c.reviewed_by, c.reviewed_at, notes, c.created_at FROM children c LEFT JOIN alert a ON c.id = a.child_id",
+		countQuery: "SELECT COUNT(*) FROM children c LEFT JOIN alert a ON c.id = a.child_id",
 	}
 }
 
@@ -30,7 +30,7 @@ func (qb *QueryBuilder) BuildList() (string, []interface{}) {
 	if len(qb.where) > 0 {
 		query += " WHERE " + strings.Join(qb.where, " AND ")
 	}
-	query += " ORDER BY created_at DESC"
+	query += " GROUP BY c.id ORDER BY c.created_at DESC"
 	return query, qb.args
 }
 

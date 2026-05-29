@@ -3,7 +3,7 @@ package children
 type Filters struct {
 	Name         string
 	Neighborhood string
-	HasAlert     *bool
+	Alert        string
 	Reviewed     *bool
 	Page         int
 	PerPage      int

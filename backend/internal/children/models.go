@@ -1,18 +1,21 @@
 package children
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type Child struct {
-	ID           string     `json:"id"`
-	Name         string     `json:"name"`
-	Age          int        `json:"age"`
-	Neighborhood string     `json:"neighborhood"`
-	HasAlert     bool       `json:"has_alert"`
-	Reviewed     bool       `json:"reviewed"`
-	ReviewedBy   *string    `json:"reviewed_by,omitempty"`
-	ReviewedAt   *time.Time `json:"reviewed_at,omitempty"`
-	Notes        string     `json:"notes"`
-	CreatedAt    time.Time  `json:"created_at"`
+	ID              string         `json:"id"`
+	Name            string         `json:"name"`
+	Age             int            `json:"age"`
+	Neighborhood    string         `json:"neighborhood"`
+	AlertCategories sql.NullString `json:"alert_categories"`
+	Reviewed        bool           `json:"reviewed"`
+	ReviewedBy      *string        `json:"reviewed_by,omitempty"`
+	ReviewedAt      *time.Time     `json:"reviewed_at,omitempty"`
+	Notes           sql.NullString `json:"notes"`
+	CreatedAt       time.Time      `json:"created_at"`
 }
 
 type Health struct {

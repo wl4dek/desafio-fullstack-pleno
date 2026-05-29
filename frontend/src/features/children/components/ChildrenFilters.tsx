@@ -12,6 +12,7 @@ import {
 import { Search } from "lucide-react"
 import { useNeighborhoods } from "@/hooks/useChildren"
 import { useEffect, useState } from "react"
+import { Alerts } from "@/stores/alert"
 
 export function ChildrenFilters() {
   const router = useRouter()
@@ -78,16 +79,19 @@ export function ChildrenFilters() {
 
       <div className="w-full sm:w-40">
         <Select
-          value={searchParams.get("has_alert") || ""}
-          onValueChange={(v) => updateFilter("has_alert", v)}
+          value={searchParams.get("alert") || ""}
+          onValueChange={(v) => updateFilter("alert", v)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Alerta" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="true">Com alerta</SelectItem>
-            <SelectItem value="false">Sem alerta</SelectItem>
+            {Object.keys(Alerts).map((key) => (
+              <SelectItem key={key} value={key}>
+                {Alerts[key as keyof typeof Alerts]}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

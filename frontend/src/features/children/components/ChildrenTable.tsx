@@ -21,7 +21,6 @@ interface ChildrenTableProps {
 }
 
 export function ChildrenTable({ filters }: ChildrenTableProps) {
-  console.log("Filters in ChildrenTable:", filters)
   const { data, isLoading, isError, refresh } = useChildren(filters)
   const router = useRouter()
 

@@ -14,7 +14,7 @@ export function ChildrenList() {
   const filters = {
     childName: searchParams.get("childName") || "",
     neighborhood: searchParams.get("neighborhood") || "",
-    has_alert: searchParams.get("has_alert") || "",
+    alert: searchParams.get("alert") || "",
     reviewed: searchParams.get("reviewed") || "",
     page: searchParams.get("page") || "1",
     per_page: searchParams.get("per_page") || "10",

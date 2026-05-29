@@ -40,10 +40,8 @@ func (h *ChildHandler) List(c *gin.Context) {
 		}
 	}
 
-	if hasAlertStr := c.Query("has_alert"); hasAlertStr != "" {
-		if val, err := strconv.ParseBool(hasAlertStr); err == nil {
-			filters.HasAlert = &val
-		}
+	if alertStr := c.Query("alert"); alertStr != "" {
+		filters.Alert = alertStr
 	}
 
 	if reviewedStr := c.Query("reviewed"); reviewedStr != "" {
