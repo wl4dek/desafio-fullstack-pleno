@@ -44,11 +44,6 @@ type health struct {
 	VaccinationsUpToDate bool     `json:"vacinas_em_dia"`
 }
 
-type alert struct {
-	Code     string `json:"codigo"`
-	Category string `json:"categoria"`
-}
-
 func LoadSeed(ctx context.Context, pool *pgxpool.Pool, path string) error {
 	var count int
 	err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM children").Scan(&count)
@@ -78,50 +73,41 @@ func LoadSeed(ctx context.Context, pool *pgxpool.Pool, path string) error {
 			return fmt.Errorf("failed to insert seed child %s: %w", s.ID, err)
 		}
 
-		err = insertHealth(ctx, pool, s.ID, s.Saude)
+		healthID, err := insertHealth(ctx, pool, s.ID, s.Saude)
 		if err != nil {
 			return fmt.Errorf("failed to insert health data for child %s: %w", s.ID, err)
 		}
 		if s.Saude != nil {
 			for _, alertCode := range s.Saude.Alerts {
-				err = insertAlert(ctx, pool, s.ID, &alert{
-					Code:     alertCode,
-					Category: "health",
-				})
+				err = insertAlertHealth(ctx, pool, healthID, alertCode)
 				if err != nil {
-					return fmt.Errorf("failed to insert alert data for child %s: %w", s.ID, err)
+					return fmt.Errorf("failed to insert health alert for child %s: %w", s.ID, err)
 				}
 			}
 		}
 
-		err = insertEducation(ctx, pool, s.ID, s.Educacao)
+		educationID, err := insertEducation(ctx, pool, s.ID, s.Educacao)
 		if err != nil {
 			return fmt.Errorf("failed to insert education data for child %s: %w", s.ID, err)
 		}
 		if s.Educacao != nil {
 			for _, alertCode := range s.Educacao.Alerts {
-				err = insertAlert(ctx, pool, s.ID, &alert{
-					Code:     alertCode,
-					Category: "education",
-				})
+				err = insertAlertEducation(ctx, pool, educationID, alertCode)
 				if err != nil {
-					return fmt.Errorf("failed to insert alert data for child %s: %w", s.ID, err)
+					return fmt.Errorf("failed to insert education alert for child %s: %w", s.ID, err)
 				}
 			}
 		}
 
-		err = insertSocialAssistance(ctx, pool, s.ID, s.AssistenciaSocial)
+		socialAssistanceID, err := insertSocialAssistance(ctx, pool, s.ID, s.AssistenciaSocial)
 		if err != nil {
 			return fmt.Errorf("failed to insert social assistance data for child %s: %w", s.ID, err)
 		}
 		if s.AssistenciaSocial != nil {
 			for _, alertCode := range s.AssistenciaSocial.Alerts {
-				err = insertAlert(ctx, pool, s.ID, &alert{
-					Code:     alertCode,
-					Category: "social_assistance",
-				})
+				err = insertAlertSocialAssistance(ctx, pool, socialAssistanceID, alertCode)
 				if err != nil {
-					return fmt.Errorf("failed to insert alert data for child %s: %w", s.ID, err)
+					return fmt.Errorf("failed to insert social assistance alert for child %s: %w", s.ID, err)
 				}
 			}
 		}

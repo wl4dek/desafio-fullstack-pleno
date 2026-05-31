@@ -15,11 +15,11 @@ var ErrChildNotFound = errors.New("child not found")
 type ChildRepository interface {
 	List(ctx context.Context, filters Filters) ([]Child, error)
 	CountFiltered(ctx context.Context, filters Filters) (int, error)
-	FindByID(ctx context.Context, id string) (*Child, error)
+	FindByID(ctx context.Context, id string) (*ChildById, error)
 	MarkReviewed(ctx context.Context, id string, reviewedBy string) error
 	Summary(ctx context.Context) (*Summary, error)
 	Count(ctx context.Context) (int, error)
-	FindAreasByChildID(ctx context.Context, id string) (*Areas, error)
+	ListAlertsByChildID(ctx context.Context, id string) ([]Alerts, error)
 	ListNeighborhood(ctx context.Context) ([]string, error)
 }
 
@@ -51,29 +51,38 @@ func (r *childRepository) ListNeighborhood(ctx context.Context) ([]string, error
 	return neighborhoods, nil
 }
 
-func (r *childRepository) FindAreasByChildID(ctx context.Context, id string) (*Areas, error) {
-	var areas Areas
-	err := r.pool.QueryRow(ctx, ` 
-		(SELECT school_name, alerts, frequency_percent FROM education WHERE child_id = $1)
-	`, id).Scan(&areas.Education.SchoolName, &areas.Education.Alerts, &areas.Education.FrequenciaPercent)
+func (r *childRepository) ListAlertsByChildID(ctx context.Context, id string) ([]Alerts, error) {
+	var alerts []Alerts
+
+	rows, err := r.pool.Query(ctx, `
+		SELECT 'health' AS category, code, message FROM alert_health ah
+		JOIN health h ON h.id = ah.health_id WHERE h.child_id = $1
+		UNION ALL
+		SELECT 'education' AS category, code, message FROM alert_education ae
+		JOIN education e ON e.id = ae.education_id WHERE e.child_id = $1
+		UNION ALL
+		SELECT 'social_assistance' AS category, code, message FROM alert_social_assistance asa
+		JOIN social_assistance s ON s.id = asa.social_assistance_id WHERE s.child_id = $1
+	`, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find areas (education) by child ID: %w", err)
+		return nil, fmt.Errorf("failed to find alerts by child ID: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var a Alerts
+		err := rows.Scan(&a.Category, &a.Code, &a.Message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan alert: %w", err)
+		}
+		alerts = append(alerts, a)
 	}
 
-	err = r.pool.QueryRow(ctx, ` 
-		(SELECT vaccinations_up_to_date, alerts, last_consultation FROM health WHERE child_id = $1)
-	`, id).Scan(&areas.Health.VaccinationsUpToDate, &areas.Health.Alerts, &areas.Health.LastConsultation)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find areas (health) by child ID: %w", err)
+	if alerts == nil {
+		alerts = []Alerts{}
 	}
 
-	err = r.pool.QueryRow(ctx, ` 
-		(SELECT cad_unico, active_benefit, alerts FROM social_assistance WHERE child_id = $1)
-	`, id).Scan(&areas.SocialAssistance.CadUnico, &areas.SocialAssistance.ActiveBenefit, &areas.SocialAssistance.Alerts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find areas (social_assistance) by child ID: %w", err)
-	}
-	return &areas, nil
+	return alerts, nil
 }
 
 func (r *childRepository) List(ctx context.Context, filters Filters) ([]Child, error) {
@@ -86,10 +95,22 @@ func (r *childRepository) List(ctx context.Context, filters Filters) ([]Child, e
 		qb.AddCondition(fmt.Sprintf("c.neighborhood = $%d", len(qb.args)+1), filters.Neighborhood)
 	}
 	if filters.Alert != "" {
-		qb.AddCondition(fmt.Sprintf("a.code = $%d", len(qb.args)+1), filters.Alert)
+		n := len(qb.args) + 1
+		qb.AddCondition(fmt.Sprintf(`(
+			EXISTS(SELECT 1 FROM health h2 JOIN alert_health ah ON h2.id = ah.health_id WHERE h2.child_id = c.id AND ah.code = $%d)
+			OR EXISTS(SELECT 1 FROM education e2 JOIN alert_education ae ON e2.id = ae.education_id WHERE e2.child_id = c.id AND ae.code = $%d)
+			OR EXISTS(SELECT 1 FROM social_assistance s2 JOIN alert_social_assistance asa ON s2.id = asa.social_assistance_id WHERE s2.child_id = c.id AND asa.code = $%d)
+		)`, n, n, n), filters.Alert)
 	}
 	if filters.Reviewed != nil {
 		qb.AddCondition(fmt.Sprintf("c.reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
+	}
+	if filters.HasAlert != nil && *filters.HasAlert {
+		qb.AddConditionOnly(`(
+			EXISTS(SELECT 1 FROM health h2 JOIN alert_health ah ON h2.id = ah.health_id WHERE h2.child_id = c.id)
+			OR EXISTS(SELECT 1 FROM education e2 JOIN alert_education ae ON e2.id = ae.education_id WHERE e2.child_id = c.id)
+			OR EXISTS(SELECT 1 FROM social_assistance s2 JOIN alert_social_assistance asa ON s2.id = asa.social_assistance_id WHERE s2.child_id = c.id)
+		)`)
 	}
 
 	query, args := qb.BuildPaginatedList(filters.PerPage, filters.Offset())
@@ -127,10 +148,22 @@ func (r *childRepository) CountFiltered(ctx context.Context, filters Filters) (i
 		qb.AddCondition(fmt.Sprintf("c.neighborhood = $%d", len(qb.args)+1), filters.Neighborhood)
 	}
 	if filters.Alert != "" {
-		qb.AddCondition(fmt.Sprintf("a.code = $%d", len(qb.args)+1), filters.Alert)
+		n := len(qb.args) + 1
+		qb.AddCondition(fmt.Sprintf(`(
+			EXISTS(SELECT 1 FROM health h2 JOIN alert_health ah ON h2.id = ah.health_id WHERE h2.child_id = c.id AND ah.code = $%d)
+			OR EXISTS(SELECT 1 FROM education e2 JOIN alert_education ae ON e2.id = ae.education_id WHERE e2.child_id = c.id AND ae.code = $%d)
+			OR EXISTS(SELECT 1 FROM social_assistance s2 JOIN alert_social_assistance asa ON s2.id = asa.social_assistance_id WHERE s2.child_id = c.id AND asa.code = $%d)
+		)`, n, n, n), filters.Alert)
 	}
 	if filters.Reviewed != nil {
 		qb.AddCondition(fmt.Sprintf("c.reviewed = $%d", len(qb.args)+1), *filters.Reviewed)
+	}
+	if filters.HasAlert != nil && *filters.HasAlert {
+		qb.AddConditionOnly(`(
+			EXISTS(SELECT 1 FROM health h2 JOIN alert_health ah ON h2.id = ah.health_id WHERE h2.child_id = c.id)
+			OR EXISTS(SELECT 1 FROM education e2 JOIN alert_education ae ON e2.id = ae.education_id WHERE e2.child_id = c.id)
+			OR EXISTS(SELECT 1 FROM social_assistance s2 JOIN alert_social_assistance asa ON s2.id = asa.social_assistance_id WHERE s2.child_id = c.id)
+		)`)
 	}
 
 	query, args := qb.BuildCount()
@@ -142,15 +175,16 @@ func (r *childRepository) CountFiltered(ctx context.Context, filters Filters) (i
 	return count, nil
 }
 
-func (r *childRepository) FindByID(ctx context.Context, id string) (*Child, error) {
-	var c Child
+func (r *childRepository) FindByID(ctx context.Context, id string) (*ChildById, error) {
+	var c ChildById
 	qb := NewQueryBuilder()
-	qb.AddCondition("id = $1", id)
-	query, args := qb.BuildList()
+	query, args := qb.BuildById(id)
 	err := r.pool.QueryRow(ctx, query, args...).Scan(
-		&c.ID, &c.Name, &c.Age, &c.Neighborhood,
-		&c.AlertCategories, &c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
-		&c.Notes, &c.CreatedAt,
+		&c.ID, &c.Name, &c.Age, &c.Neighborhood, &c.AlertCategories,
+		&c.Reviewed, &c.ReviewedBy, &c.ReviewedAt,
+		&c.Notes, &c.CreatedAt, &c.Health.VaccinationsUpToDate, &c.Health.LastConsultation,
+		&c.Education.SchoolName, &c.Education.FrequenciaPercent,
+		&c.SocialAssistance.CadUnico, &c.SocialAssistance.ActiveBenefit,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -186,17 +220,17 @@ func (r *childRepository) Summary(ctx context.Context) (*Summary, error) {
 		return nil, fmt.Errorf("failed to get summary: %w", err)
 	}
 
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM education").Scan(&education)
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_education").Scan(&education)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get education alerts: %w", err)
 	}
 
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM health").Scan(&health)
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_health").Scan(&health)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get health alerts: %w", err)
 	}
 
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM social_assistance").Scan(&social)
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_social_assistance").Scan(&social)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get social assistance alerts: %w", err)
 	}

@@ -34,14 +34,35 @@ CREATE TABLE IF NOT EXISTS social_assistance (
     FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS alert (
+CREATE TABLE IF NOT EXISTS alert_health (
     id BIGSERIAL PRIMARY KEY,
+    health_id BIGSERIAL NOT NULL,
 
-    child_id TEXT NOT NULL,
-    category TEXT NOT NULL,
     code TEXT NOT NULL,
     message TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+    FOREIGN KEY (health_id) REFERENCES health(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS alert_education (
+    id BIGSERIAL PRIMARY KEY,
+    education_id BIGSERIAL NOT NULL,
+
+    code TEXT NOT NULL,
+    message TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    FOREIGN KEY (education_id) REFERENCES education(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS alert_social_assistance (
+    id BIGSERIAL PRIMARY KEY,
+    social_assistance_id BIGSERIAL NOT NULL,
+
+    code TEXT NOT NULL,
+    message TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    FOREIGN KEY (social_assistance_id) REFERENCES social_assistance(id) ON DELETE CASCADE
 );

@@ -56,7 +56,7 @@ func SetupRouter(pool *pgxpool.Pool, jwtSecret string, allowOrigins []string) *g
 		authGroup.GET("/children", childHandler.List)
 		authGroup.GET("/children/neighborhood", childHandler.ListNeighborhood)
 		authGroup.GET("/children/:id", childHandler.GetByID)
-		authGroup.GET("/children/:id/areas", childHandler.GetAreasByChildID)
+
 		authGroup.PATCH("/children/:id/review", childHandler.MarkReviewed)
 		authGroup.GET("/summary", summaryHandler.GetSummary)
 	}

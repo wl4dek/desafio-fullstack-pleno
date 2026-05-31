@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS children (
     name TEXT NOT NULL,
     age INTEGER NOT NULL,
     neighborhood TEXT NOT NULL,
-    has_alert BOOLEAN NOT NULL DEFAULT FALSE,
     reviewed BOOLEAN NOT NULL DEFAULT FALSE,
     reviewed_by TEXT,
     reviewed_at TIMESTAMP,

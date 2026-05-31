@@ -50,6 +50,12 @@ func (h *ChildHandler) List(c *gin.Context) {
 		}
 	}
 
+	if hasAlertStr := c.Query("has_alert"); hasAlertStr != "" {
+		if val, err := strconv.ParseBool(hasAlertStr); err == nil {
+			filters.HasAlert = &val
+		}
+	}
+
 	result, err := h.service.List(c.Request.Context(), filters)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
@@ -91,22 +97,6 @@ func (h *ChildHandler) MarkReviewed(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "review registered"})
-}
-
-func (h *ChildHandler) GetAreasByChildID(c *gin.Context) {
-	id := c.Param("id")
-	areas, err := h.service.GetAreasByChildID(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
-		return
-	}
-
-	if areas == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "child not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, areas)
 }
 
 func (h *ChildHandler) ListNeighborhood(c *gin.Context) {

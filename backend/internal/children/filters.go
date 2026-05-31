@@ -5,6 +5,7 @@ type Filters struct {
 	Neighborhood string
 	Alert        string
 	Reviewed     *bool
+	HasAlert     *bool
 	Page         int
 	PerPage      int
 }

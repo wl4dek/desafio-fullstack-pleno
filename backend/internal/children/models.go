@@ -10,7 +10,7 @@ type Child struct {
 	Name            string         `json:"name"`
 	Age             int            `json:"age"`
 	Neighborhood    string         `json:"neighborhood"`
-	AlertCategories sql.NullString `json:"alert_categories"`
+	AlertCategories []string `json:"alert_categories"`
 	Reviewed        bool           `json:"reviewed"`
 	ReviewedBy      *string        `json:"reviewed_by,omitempty"`
 	ReviewedAt      *time.Time     `json:"reviewed_at,omitempty"`
@@ -18,28 +18,55 @@ type Child struct {
 	CreatedAt       time.Time      `json:"created_at"`
 }
 
+type ChildById struct {
+	Child
+	Health           Health           `json:"health"`
+	Education        Education        `json:"education"`
+	SocialAssistance SocialAssistance `json:"social_assistance"`
+}
+
+type Alerts struct {
+	Category string         `json:"category"`
+	Code     string         `json:"code"`
+	Message  sql.NullString `json:"message"`
+}
+
+type ChildResponse struct {
+	ID              string     `json:"id"`
+	Name            string     `json:"name"`
+	Age             int        `json:"age"`
+	Neighborhood    string     `json:"neighborhood"`
+	AlertCategories []string   `json:"alert_categories"`
+	Reviewed        bool       `json:"reviewed"`
+	ReviewedBy      *string    `json:"reviewed_by,omitempty"`
+	ReviewedAt      *time.Time `json:"reviewed_at,omitempty"`
+	Notes           string     `json:"notes"`
+	CreatedAt       time.Time  `json:"created_at"`
+}
+
+type ChildByIdResponse struct {
+	ChildResponse
+	Health           Health           `json:"health"`
+	Education        Education        `json:"education"`
+	SocialAssistance SocialAssistance `json:"social_assistance"`
+}
+
 type Health struct {
 	VaccinationsUpToDate bool       `json:"vaccinationsUpToDate"`
-	Alerts               []string   `json:"alerts"`
 	LastConsultation     *time.Time `json:"lastConsultation"`
+	Alerts               []string   `json:"alerts"`
 }
 
 type SocialAssistance struct {
-	Alerts        []string `json:"alerts"`
 	CadUnico      bool     `json:"cadUnico"`
 	ActiveBenefit bool     `json:"activeBenefit"`
+	Alerts        []string `json:"alerts"`
 }
 
 type Education struct {
-	Alerts            []string `json:"alerts"`
 	SchoolName        *string  `json:"schoolName"`
 	FrequenciaPercent int      `json:"frequenciaPercent"`
-}
-
-type Areas struct {
-	Health           Health           `json:"health"`
-	SocialAssistance SocialAssistance `json:"socialAssistance"`
-	Education        Education        `json:"education"`
+	Alerts            []string `json:"alerts"`
 }
 
 type PaginatedResponse struct {
