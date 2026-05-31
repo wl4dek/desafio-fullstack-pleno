@@ -61,36 +61,31 @@ export function ChildrenTable({ filters }: ChildrenTableProps) {
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead className="hidden md:table-cell">Bairro</TableHead>
-            <TableHead>Alerta</TableHead>
-            <TableHead>Revisão</TableHead>
-            <TableHead>Detalhes</TableHead>
+            <TableHead className="text-center">Alerta</TableHead>
+            <TableHead className="text-center">Revisão</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.data.map((child) => (
             <TableRow key={child.id}>
-              <TableCell className="font-medium">{child.name}</TableCell>
-              <TableCell className="hidden md:table-cell">{child.neighborhood}</TableCell>
-              <TableCell className="flex flex-wrap gap-1">
-                {child.alert_categories.length > 0 ? child.alert_categories.map((category, i) => (
-                  <Badge key={i} variant="destructive">{AlertsCategories[category as AlertCategoryType]}</Badge>
-                )) : <Badge variant="success">OK</Badge>}
+              <TableCell className="font-medium hover:cursor-pointer hover:bg-gray-600 dark:hover:bg-gray-400" onClick={() => router.push(`/children/${child.id}`)}>
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  {child.name}
+                </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">{child.neighborhood}</TableCell>
+              <TableCell className="text-center pt-px">
+                {child.alert_categories.length > 0 ? child.alert_categories.map((category, i) => (
+                  <Badge className="mb-1 mr-1" key={i} variant="destructive">{AlertsCategories[category as AlertCategoryType]}</Badge>
+                )) : <Badge className="mpx" variant="success">OK</Badge>}
+              </TableCell>
+              <TableCell className="text-center">
                 {child.reviewed ? (
                   <Badge variant="success">Revisado</Badge>
                 ) : (
                   <Badge variant="warning">Pendente</Badge>
                 )}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push(`/children/${child.id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
               </TableCell>
             </TableRow>
           ))}

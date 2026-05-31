@@ -7,9 +7,9 @@ const mockSummary = {
   reviewed: 14,
   pending_review: 11,
   alerts_by_area: {
-    Saúde: 5,
-    Educação: 2,
-    "Assistência Social": 4,
+    health: 5,
+    education: 2,
+    social_assistance: 4,
   },
 }
 

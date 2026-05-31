@@ -1,12 +1,13 @@
 "use client"
 
+import { ThemeProvider } from "next-themes"
 import { Header } from "@/components/Header"
 import { AuthGuard } from "@/components/AuthGuard"
 import { Toaster } from "@/components/ui/toaster"
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <Toaster />
 
       <Header />
@@ -16,6 +17,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </AuthGuard>
-    </>
+    </ThemeProvider>
   )
 }
