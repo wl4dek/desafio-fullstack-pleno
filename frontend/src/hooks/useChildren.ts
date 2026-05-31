@@ -1,6 +1,6 @@
 import useSWR from "swr"
 import { fetchChildren } from "@/services/children"
-import type { PaginatedResponse, ChildFilters, Areas } from "@/types"
+import type { PaginatedResponse, ChildFilters, Alert } from "@/types"
 
 export function useChildren(filters: ChildFilters) {
   const params = Object.fromEntries(
@@ -34,20 +34,6 @@ export function useChild(id: string) {
 
   return {
     child: data,
-    isLoading,
-    isError: !!error,
-    error,
-  }
-}
-
-export function useChildAreas(id: string) {
-  const { data, error, isLoading } = useSWR<Areas>(
-    id ? `/children/${id}/areas` : null,
-    () => import("@/services/children").then((m) => m.fetchChildAreas(id)),
-  )
-
-  return {
-    areas: data,
     isLoading,
     isError: !!error,
     error,

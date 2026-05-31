@@ -3,7 +3,7 @@ export interface Child {
   name: string
   age: number
   neighborhood: string
-  has_alert: boolean
+  alert_categories: string[]
   reviewed: boolean
   reviewed_by?: string | null
   reviewed_at?: string | null
@@ -11,28 +11,39 @@ export interface Child {
   created_at: string
 }
 
-export interface Areas {
+export interface ChildById extends Child {
   health: Health
-  socialAssistance: SocialAssistance
+  social_assistance: SocialAssistance
   education: Education
 }
 
+export const AlertsCategories = {
+  health: "Saúde",
+  social_assistance: "Assistência Social",
+  education: "Educação",
+} as const
+
+export type AlertCategoryType = keyof typeof AlertsCategories
+
+export interface Alert {
+  category: AlertCategoryType
+  code: string
+  message: string
+}
+
 export interface Health {
-  type?: string
-  vaccinationsUpToDate: boolean
   alerts: string[]
+  vaccinationsUpToDate: boolean
   lastConsultation: string
 }
 
 export interface SocialAssistance {
-  type?: string
   alerts: string[]
   cadUnico: boolean
   activeBenefit: boolean
 }
 
 export interface Education {
-  type?: string
   alerts: string[]
   schoolName: string
   frequenciaPercent: number
@@ -66,6 +77,7 @@ export interface LoginResponse {
 export interface ChildFilters {
   childName?: string
   neighborhood?: string
+  alert?: string
   has_alert?: string
   reviewed?: string
   page?: string

@@ -1,11 +1,13 @@
 "use client"
 
 import { useSummary } from "@/hooks/useSummary"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, CheckCircle, Clock, Users, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { AlertCategoryType, AlertsCategories } from "@/types"
 
 export function SummaryCards() {
   const { summary, isLoading, isError, refresh } = useSummary()
@@ -31,7 +33,7 @@ export function SummaryCards() {
     return (
       <Card className="p-6 text-center">
         <p className="text-red-500 mb-2">Erro ao carregar indicadores</p>
-          <Button variant="outline" size="sm" onClick={() => refresh()} className="gap-2">
+        <Button variant="outline" size="sm" onClick={() => refresh()} className="gap-2">
           <RefreshCw className="h-4 w-4" />
           Tentar novamente
         </Button>
@@ -42,7 +44,7 @@ export function SummaryCards() {
   if (!summary) return null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -54,37 +56,49 @@ export function SummaryCards() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Revisadas</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">{summary.reviewed}</p>
-          </CardContent>
-        </Card>
+        <Link href="/children?reviewed=true" className="hover:underline">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Revisadas</CardTitle>
+              <div className="flex items-center gap-4 text-green-500">
+                {((summary.reviewed / summary.total_children) * 100).toFixed(1)}%
+                <CheckCircle className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-green-600">{summary.reviewed}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-yellow-600">{summary.pending_review}</p>
-          </CardContent>
-        </Card>
+        <Link href="/children?reviewed=false" className="hover:underline">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+              <div className="flex items-center gap-4 text-yellow-500">
+                {((summary.pending_review / summary.total_children) * 100).toFixed(1)}%
+                <Clock className="h-4 w-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-yellow-600">{summary.pending_review}</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Com Alerta</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-600">
-              {Object.values(summary.alerts_by_area).reduce((a, b) => a + b, 0)}
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/children?has_alert=true" className="hover:underline">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Com Alerta</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-red-600">
+                {Object.values(summary.alerts_by_area).reduce((a, b) => a + b, 0)}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <Card>
@@ -95,7 +109,7 @@ export function SummaryCards() {
           <div className="flex flex-wrap gap-2">
             {Object.entries(summary.alerts_by_area).map(([area, count]) => (
               <Badge key={area} variant="warning" className="text-sm px-3 py-1">
-                {area}: {count}
+                {AlertsCategories[area as AlertCategoryType]}: {count}
               </Badge>
             ))}
             {Object.keys(summary.alerts_by_area).length === 0 && (

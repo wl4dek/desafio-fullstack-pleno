@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useChildren } from "@/hooks/useChildren"
-import type { ChildFilters } from "@/types"
+import { AlertCategoryType, AlertsCategories, type ChildFilters } from "@/types"
 import {
   Table,
   TableBody,
@@ -63,7 +63,7 @@ export function ChildrenTable({ filters }: ChildrenTableProps) {
             <TableHead className="hidden md:table-cell">Bairro</TableHead>
             <TableHead>Alerta</TableHead>
             <TableHead>Revisão</TableHead>
-            <TableHead className="text-right">Ação</TableHead>
+            <TableHead>Detalhes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -71,12 +71,10 @@ export function ChildrenTable({ filters }: ChildrenTableProps) {
             <TableRow key={child.id}>
               <TableCell className="font-medium">{child.name}</TableCell>
               <TableCell className="hidden md:table-cell">{child.neighborhood}</TableCell>
-              <TableCell>
-                {child.has_alert ? (
-                  <Badge variant="destructive">Alerta</Badge>
-                ) : (
-                  <Badge variant="secondary">Normal</Badge>
-                )}
+              <TableCell className="flex flex-wrap gap-1">
+                {child.alert_categories.length > 0 ? child.alert_categories.map((category, i) => (
+                  <Badge key={i} variant="destructive">{AlertsCategories[category as AlertCategoryType]}</Badge>
+                )) : <Badge variant="success">OK</Badge>}
               </TableCell>
               <TableCell>
                 {child.reviewed ? (
@@ -92,7 +90,6 @@ export function ChildrenTable({ filters }: ChildrenTableProps) {
                   onClick={() => router.push(`/children/${child.id}`)}
                 >
                   <Eye className="h-4 w-4" />
-                  <p>{child.id}</p>
                 </Button>
               </TableCell>
             </TableRow>
