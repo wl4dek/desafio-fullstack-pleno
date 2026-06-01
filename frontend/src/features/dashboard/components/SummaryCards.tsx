@@ -46,7 +46,7 @@ export function SummaryCards() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-blue-100 dark:bg-blue-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total de Crianças</CardTitle>
             <Users className="h-4 w-4 text-neutral-500" />
@@ -57,7 +57,7 @@ export function SummaryCards() {
         </Card>
 
         <Link href="/children?reviewed=true" className="hover:underline">
-          <Card>
+          <Card className="bg-green-100 dark:bg-green-900">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Revisadas</CardTitle>
               <div className="flex items-center gap-4 text-green-500">
@@ -72,7 +72,7 @@ export function SummaryCards() {
         </Link>
 
         <Link href="/children?reviewed=false" className="hover:underline">
-          <Card>
+          <Card className="bg-yellow-100 dark:bg-yellow-900">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
               <div className="flex items-center gap-4 text-yellow-500">
@@ -87,7 +87,7 @@ export function SummaryCards() {
         </Link>
 
         <Link href="/children?has_alert=true" className="hover:underline">
-          <Card>
+          <Card className="bg-red-100 dark:bg-red-950">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Com Alerta</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-500" />

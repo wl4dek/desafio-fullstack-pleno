@@ -30,3 +30,7 @@ func (s *AuthService) Authenticate(email, password string) (string, error) {
 
 	return token, nil
 }
+
+func (s *AuthService) ValidateToken(tokenStr string) (*Claims, error) {
+	return ValidateToken(tokenStr, s.secret)
+}

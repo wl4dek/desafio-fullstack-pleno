@@ -26,9 +26,10 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
+          <img src="image.png" alt="" className="mx-auto bg-[#004a80] p-5 rounded-xl" />
           <CardTitle className="text-xl">Acesso ao Painel</CardTitle>
           <CardDescription>Informe suas credenciais</CardDescription>
         </CardHeader>

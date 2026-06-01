@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,9 +44,45 @@ func (h *AuthHandler) Token(c *gin.Context) {
 		return
 	}
 
+	secure := c.Request.TLS != nil
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("auth_token", token, 3600, "/", "", secure, true)
+
 	c.JSON(http.StatusOK, tokenResponse{
 		AccessToken: token,
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
+	})
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	secure := c.Request.TLS != nil
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("auth_token", "", -1, "/", "", secure, true)
+	c.Status(http.StatusNoContent)
+}
+
+func (h *AuthHandler) Session(c *gin.Context) {
+	token, err := c.Cookie("auth_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no session"})
+		return
+	}
+
+	claims, err := h.service.ValidateToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid session"})
+		return
+	}
+
+	expiresIn := int(time.Until(claims.ExpiresAt.Time).Seconds())
+	if expiresIn < 0 {
+		expiresIn = 0
+	}
+
+	c.JSON(http.StatusOK, tokenResponse{
+		AccessToken: token,
+		TokenType:   "Bearer",
+		ExpiresIn:   expiresIn,
 	})
 }

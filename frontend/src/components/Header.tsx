@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 
 import { useAuthStore } from "@/stores/auth"
@@ -25,6 +25,8 @@ import {
   Menu,
 } from "lucide-react"
 
+const BASE_URL = process.env.API_URL || "http://localhost:8080"
+
 const navLinks = [
   {
     href: "/dashboard",
@@ -46,6 +48,7 @@ export function Header() {
   }, [])
 
   const pathname = usePathname()
+  const router = useRouter()
 
   const { theme, setTheme } = useTheme()
 
@@ -54,6 +57,18 @@ export function Header() {
   const isAuthenticated = useAuthStore(
     (s) => s.isAuthenticated
   )
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${BASE_URL}/auth/session`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+    } finally {
+      logout()
+      router.push("/login")
+    }
+  }
 
   if (!mounted) {
     return (
@@ -128,7 +143,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="gap-2"
                   >
                     <LogOut className="h-4 w-4" />
@@ -183,7 +198,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={logout}
+            onClick={handleLogout}
             className="hidden md:inline-flex gap-2"
           >
             <LogOut className="h-4 w-4" />

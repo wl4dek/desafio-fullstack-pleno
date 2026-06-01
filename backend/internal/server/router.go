@@ -49,6 +49,8 @@ func SetupRouter(pool *pgxpool.Pool, jwtSecret string, allowOrigins []string) *g
 	summaryHandler := summary.NewSummaryHandler(summaryService)
 
 	r.POST("/auth/token", authHandler.Token)
+	r.GET("/auth/session", authHandler.Session)
+	r.DELETE("/auth/session", authHandler.Logout)
 
 	authGroup := r.Group("/")
 	authGroup.Use(auth.AuthMiddleware(jwtSecret))

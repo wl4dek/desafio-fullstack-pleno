@@ -1,3 +1,5 @@
+import { useAuthStore } from "@/stores/auth"
+
 const BASE_URL = process.env.API_URL || "http://localhost:8080"
 
 export class ApiError extends Error {
@@ -44,12 +46,12 @@ async function request<T>(
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null
-  return localStorage.getItem("auth_token")
+  return useAuthStore.getState().token
 }
 
 function clearToken() {
   if (typeof window === "undefined") return
-  localStorage.removeItem("auth_token")
+  useAuthStore.getState().logout()
 }
 
 export const api = {
