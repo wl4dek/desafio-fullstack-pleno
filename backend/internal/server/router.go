@@ -10,7 +10,7 @@ import (
 
 	"backend/internal/auth"
 	"backend/internal/children"
-	"backend/internal/summary"
+	"backend/internal/statistics"
 )
 
 func SetupRouter(pool *pgxpool.Pool, jwtSecret string, allowOrigins []string) *gin.Engine {
@@ -39,20 +39,21 @@ func SetupRouter(pool *pgxpool.Pool, jwtSecret string, allowOrigins []string) *g
 	}))
 
 	childRepo := children.NewChildRepository(pool)
+	statisticRepo := statistics.NewStatisticsRepository(pool)
 	childService := children.NewChildService(childRepo)
 	childHandler := children.NewChildHandler(childService)
 
 	authService := auth.NewAuthService(jwtSecret, time.Hour)
 	authHandler := auth.NewAuthHandler(authService)
 
-	summaryService := summary.NewSummaryService(childRepo)
-	summaryHandler := summary.NewSummaryHandler(summaryService)
+	statisticsService := statistics.NewStatisticsService(statisticRepo)
+	statisticsHandler := statistics.NewStatisticsHandler(statisticsService)
 
 	r.POST("/auth/token", authHandler.Token)
 	r.GET("/auth/session", authHandler.Session)
 	r.DELETE("/auth/session", authHandler.Logout)
 
-	authGroup := r.Group("/")
+	authGroup := r.Group("/api/v1")
 	authGroup.Use(auth.AuthMiddleware(jwtSecret))
 	{
 		authGroup.GET("/children", childHandler.List)
@@ -60,7 +61,8 @@ func SetupRouter(pool *pgxpool.Pool, jwtSecret string, allowOrigins []string) *g
 		authGroup.GET("/children/:id", childHandler.GetByID)
 
 		authGroup.PATCH("/children/:id/review", childHandler.MarkReviewed)
-		authGroup.GET("/summary", summaryHandler.GetSummary)
+		authGroup.GET("/summary", statisticsHandler.GetSummary)
+		authGroup.GET("/statistics", statisticsHandler.GetStatistics)
 	}
 
 	return r

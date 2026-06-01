@@ -90,16 +90,16 @@ func (s *ChildService) GetByID(ctx context.Context, id string) (*ChildByIdRespon
 
 	return &ChildByIdResponse{
 		ChildResponse: ChildResponse{
-			ID:               child.ID,
-			Name:             child.Name,
-			Age:              child.Age,
-			Neighborhood:     child.Neighborhood,
-			AlertCategories:  alertCategories,
-			Reviewed:         child.Reviewed,
-			ReviewedBy:       child.ReviewedBy,
-			ReviewedAt:       child.ReviewedAt,
-			Notes:            notes,
-			CreatedAt:        child.CreatedAt,
+			ID:              child.ID,
+			Name:            child.Name,
+			Age:             child.Age,
+			Neighborhood:    child.Neighborhood,
+			AlertCategories: alertCategories,
+			Reviewed:        child.Reviewed,
+			ReviewedBy:      child.ReviewedBy,
+			ReviewedAt:      child.ReviewedAt,
+			Notes:           notes,
+			CreatedAt:       child.CreatedAt,
 		},
 		Health:           child.Health,
 		Education:        child.Education,
@@ -109,10 +109,6 @@ func (s *ChildService) GetByID(ctx context.Context, id string) (*ChildByIdRespon
 
 func (s *ChildService) MarkReviewed(ctx context.Context, id string, reviewedBy string) error {
 	return s.repo.MarkReviewed(ctx, id, reviewedBy)
-}
-
-func (s *ChildService) Summary(ctx context.Context) (*Summary, error) {
-	return s.repo.Summary(ctx)
 }
 
 func (s *ChildService) ListNeighborhood(ctx context.Context) ([]string, error) {

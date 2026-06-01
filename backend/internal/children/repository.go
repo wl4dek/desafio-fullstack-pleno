@@ -17,7 +17,6 @@ type ChildRepository interface {
 	CountFiltered(ctx context.Context, filters Filters) (int, error)
 	FindByID(ctx context.Context, id string) (*ChildById, error)
 	MarkReviewed(ctx context.Context, id string, reviewedBy string) error
-	Summary(ctx context.Context) (*Summary, error)
 	Count(ctx context.Context) (int, error)
 	ListAlertsByChildID(ctx context.Context, id string) ([]Alerts, error)
 	ListNeighborhood(ctx context.Context) ([]string, error)
@@ -210,42 +209,6 @@ func (r *childRepository) MarkReviewed(ctx context.Context, id string, reviewedB
 	}
 
 	return nil
-}
-
-func (r *childRepository) Summary(ctx context.Context) (*Summary, error) {
-	var total, reviewed, education, health, social int
-	err := r.pool.QueryRow(ctx, "SELECT COUNT(*), COALESCE(SUM(CASE WHEN reviewed THEN 1 ELSE 0 END), 0) FROM children").
-		Scan(&total, &reviewed)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get summary: %w", err)
-	}
-
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_education").Scan(&education)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get education alerts: %w", err)
-	}
-
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_health").Scan(&health)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get health alerts: %w", err)
-	}
-
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM alert_social_assistance").Scan(&social)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get social assistance alerts: %w", err)
-	}
-
-	alertsByArea := make(map[string]int)
-	alertsByArea["education"] = education
-	alertsByArea["health"] = health
-	alertsByArea["social_assistance"] = social
-
-	return &Summary{
-		TotalChildren: total,
-		Reviewed:      reviewed,
-		PendingReview: total - reviewed,
-		AlertsByArea:  alertsByArea,
-	}, nil
 }
 
 func (r *childRepository) Count(ctx context.Context) (int, error) {

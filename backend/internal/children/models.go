@@ -10,7 +10,7 @@ type Child struct {
 	Name            string         `json:"name"`
 	Age             int            `json:"age"`
 	Neighborhood    string         `json:"neighborhood"`
-	AlertCategories []string `json:"alert_categories"`
+	AlertCategories []string       `json:"alert_categories"`
 	Reviewed        bool           `json:"reviewed"`
 	ReviewedBy      *string        `json:"reviewed_by,omitempty"`
 	ReviewedAt      *time.Time     `json:"reviewed_at,omitempty"`
@@ -79,11 +79,4 @@ type Pagination struct {
 	PerPage    int `json:"per_page"`
 	Total      int `json:"total"`
 	TotalPages int `json:"total_pages"`
-}
-
-type Summary struct {
-	TotalChildren int            `json:"total_children"`
-	Reviewed      int            `json:"reviewed"`
-	PendingReview int            `json:"pending_review"`
-	AlertsByArea  map[string]int `json:"alerts_by_area"`
 }
