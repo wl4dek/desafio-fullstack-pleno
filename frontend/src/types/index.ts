@@ -83,3 +83,39 @@ export interface ChildFilters {
   page?: string
   per_page?: string
 }
+
+export interface StatisticsResponse {
+  statistics: {
+    neighborhood: string
+    health: number
+    social_assistance: number
+    education: number
+  }[]
+}
+
+export interface Feature {
+  type: string
+  properties: Properties
+  geometry: Geometry
+}
+
+export interface Properties {
+  objectid: number
+  nome: string
+  regiao_adm: string
+  area_plane: string
+  codbairro: string
+  codra: number
+  codbnum: number
+  link: string
+  rp: string
+  cod_rp: string
+  codbairro_long: number
+  st_areashape: number
+  st_perimetershape: number
+}
+
+export interface Geometry {
+  type: string
+  coordinates: number[][][][]
+}

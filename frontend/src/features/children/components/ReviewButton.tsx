@@ -6,6 +6,17 @@ import { markReviewed } from "@/services/children"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { CheckCircle } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 
 interface ReviewButtonProps {
   childId: string
@@ -39,9 +50,25 @@ export function ReviewButton({ childId }: ReviewButtonProps) {
   }
 
   return (
-    <Button onClick={handleReview} disabled={loading} className="gap-2">
-      <CheckCircle className="h-4 w-4" />
-      {loading ? "Registrando..." : "Marcar como Revisado"}
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button disabled={loading} className="gap-2">
+          <CheckCircle className="h-4 w-4" />
+          {loading ? "Registrando..." : "Marcar como Revisado"}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revisão</AlertDialogTitle>
+          <AlertDialogDescription>
+            O técnico está pronto para registrar a revisão?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Não</AlertDialogCancel>
+          <AlertDialogAction onClick={handleReview}>Sim</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

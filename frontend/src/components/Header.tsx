@@ -20,6 +20,7 @@ import {
   LogOut,
   LayoutDashboard,
   Users,
+  BarChart3,
   Sun,
   Moon,
   Menu,
@@ -37,6 +38,11 @@ const navLinks = [
     href: "/children",
     label: "Crianças",
     icon: Users,
+  },
+  {
+    href: "/statistics",
+    label: "Estatísticas",
+    icon: BarChart3,
   },
 ]
 

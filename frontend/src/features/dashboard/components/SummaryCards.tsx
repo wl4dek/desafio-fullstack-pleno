@@ -1,7 +1,7 @@
 "use client"
 
 import { useSummary } from "@/hooks/useSummary"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, CheckCircle, Clock, Users, RefreshCw } from "lucide-react"

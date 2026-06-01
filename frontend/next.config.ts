@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
         source: "/summary",
         destination: `${API_URL}/summary`,
       },
+      {
+        source: "/statistics",
+        destination: `${API_URL}/statistics`,
+      },
     ]
   },
 }
