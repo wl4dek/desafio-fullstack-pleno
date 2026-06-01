@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useStatistic } from "@/hooks/useStatistic"
-import { AlertCategoryType, AlertsCategories, Feature } from "@/types"
+import { AlertCategoryType, AlertsCategories } from "@/types"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { GeoJSON, MapContainer, TileLayer } from "react-leaflet"
@@ -89,7 +89,7 @@ export function AlertsArea() {
 
                 <GeoJSON
                     data={bairrosRio as any}
-                    style={(feature: Feature) => {
+                    style={(feature) => {
                         const neighborhood = feature?.properties?.nome?.toLowerCase();
                         const info = bairrosGeoJson[neighborhood];
                         const value = info?.[metric] ?? 0;
@@ -101,7 +101,7 @@ export function AlertsArea() {
                             weight: 1,
                         };
                     }}
-                    onEachFeature={(feature: Feature, layer) => {
+                    onEachFeature={(feature, layer) => {
                         const neighborhood = feature?.properties?.nome?.toLowerCase();
                         const info = bairrosGeoJson[neighborhood];
                         const value = info?.[metric] ?? 0;

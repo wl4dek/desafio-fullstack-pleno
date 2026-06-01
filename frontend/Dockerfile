@@ -1,21 +1,22 @@
-# --------- deps ----------
 FROM node:lts-alpine AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci
+RUN apk add --no-cache libc6-compat
+RUN npm i -g pnpm
 
-# --------- builder ----------
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
 FROM node:lts-alpine AS builder
 WORKDIR /app
+
+RUN npm i -g pnpm
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build Next.js app
-RUN npm run build
+RUN pnpm run build
 
-# --------- runner ----------
 FROM node:lts-alpine AS runner
 WORKDIR /app
 
@@ -33,4 +34,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node_modules/.bin/next", "start"]
