@@ -1,0 +1,17 @@
+### Decisões arquiteturais e trade-offs
+
+- **Banco de dados**: PostgreSQL  
+  **Justificativa**:  
+  Optamos por um sistema de banco relacional (PostgreSQL) porque o modelo de domínio é estruturado e bem definido: cada criança possui dados correlacionados (saúde, educação e assistência social), status de revisão e alertas com regras de negócio claras (ex.: “vacina atrasada” é calculado a partir de data de nascimento + vacinas cadastradas). O schema relacional permite:
+  - Integridade referencial forte (chaves estrangeiras, constraints, triggers para validação de alertas);
+  - Consultas complexas e ACID-compliant (ex.: agregação no endpoint /summary com joins eficientes, contagem de alertas por área, filtros por bairro + presença de alertas);
+  - Facilidade de manutenção e evolução futura (adicionar novos campos, regras de negócio ou histórico de alterações sem quebrar a API).
+
+  Vantagens principais:
+  - Consultas SQL padronizadas e legíveis (Gin ORM facilita muito o uso);
+  - Recursos nativos de performance: índices, views materializadas (podemos adicionar futuramente) e transações seguras;
+  - Compatibilidade com as ferramentas da Prefeitura (Docker + Node.js) e com a necessidade de auditoria de registros (quem revisou qual criança quando).
+
+  Trade-offs considerados:
+  - Performance em escala: para 25 crianças fictícias não é um problema. Em uma implantação real com milhares de crianças por bairro, poderíamos evoluir para materializações de views ou até migração para NoSQL em partes de dados não transacionais (alertas e histórico de revisões).
+  - Manutenção inicial: schema + migração com SQLAlchemy alembic foi simples e testada no seed.json. Não usamos NoSQL porque o modelo relacional já cobre 100% dos requisitos funcionais sem perda de desempenho ou complexidade desnecessária.
