@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "@/stores/auth"
 
-const BASE_URL = process.env.API_URL || "http://localhost:8080"
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 const publicRoutes = ["/login"]
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {

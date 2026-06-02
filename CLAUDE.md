@@ -46,7 +46,7 @@ docker compose down -v             # Full reset (wipes DB)
 | `DATABASE_URL` | `postgres://postgres:postgres@localhost:5432/children?...` | backend |
 | `JWT_SECRET` | `super-secret` | backend |
 | `ALLOW_ORIGINS` | `http://localhost:3000` | backend |
-| `API_URL` | `""` (proxy rewrites) | frontend |
+| `NEXT_PUBLIC_API_URL` | `""` (proxy rewrites) | frontend |
 
 ## Auth
 

@@ -15,8 +15,8 @@ RUN npm i -g pnpm
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG API_URL
-ENV API_URL=$API_URL
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN pnpm run build
 

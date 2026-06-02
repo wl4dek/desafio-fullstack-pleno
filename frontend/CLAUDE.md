@@ -107,7 +107,7 @@ src/
 ## API
 
 - `src/lib/api.ts` — client HTTP com Bearer token injetado do Zustand
-- `API_URL` env var (default `http://localhost:8080`)
+- `NEXT_PUBLIC_API_URL` env var (default `http://localhost:8080`)
 - Rewrites no `next.config.ts`
 - Tratamento automático de 401 (limpa token e redireciona)
 
