@@ -26,7 +26,7 @@ import {
   Menu,
 } from "lucide-react"
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+const BASE_URL = process.env.API_URL || "http://localhost:8080"
 
 const navLinks = [
   {
@@ -66,7 +66,7 @@ export function Header() {
 
   const handleLogout = async () => {
     try {
-      await fetch(`/auth/session`, {
+      await fetch(`${BASE_URL}/auth/session`, {
         method: "DELETE",
         credentials: "include",
       })
