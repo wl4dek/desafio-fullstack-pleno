@@ -5,7 +5,7 @@ services:
       context: ./frontend
       args:
         API_URL: http://api:8080
-        NEXT_PUBLIC_API_URL: http://localhost:8080
+        NEXT_PUBLIC_API_URL: http://api:8080
     ports:
       - "3000:3000"
     depends_on: [ api ]
@@ -20,15 +20,16 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      ALLOW_ORIGINS: "http://frontend:3000,http://localhost:3000"
       PORT: 8080
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/full-stack?sslmode=disable
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/full-stack-test?sslmode=disable
       JWT_SECRET: super-secret
 
   postgres:
     image: postgres:17-alpine
     restart: always
     environment:
-      POSTGRES_DB: full-stack
+      POSTGRES_DB: full-stack-test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -39,7 +40,24 @@ services:
       timeout: 3s
       retries: 10
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-test:/var/lib/postgresql/data
+
+  e2e:
+    build: ./e2e
+    ports:
+      - "9323:9323"
+    depends_on:
+      frontend:
+        condition: service_started
+    environment:
+      BASE_URL: http://frontend:3000
+    command: >
+      sh -c "
+        pnpm test;
+        pnpm exec playwright show-report --host 0.0.0.0 --port 9323 playwright/reports
+      "
+    volumes:
+      - ./e2e:/app
 
 volumes:
-  pgdata:
+  pgdata-test:
